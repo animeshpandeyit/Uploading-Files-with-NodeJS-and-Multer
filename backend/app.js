@@ -1,10 +1,10 @@
-const express = require("express");
-const app = express();
-const port = 3000;
-const multer = require("multer");
-const fs = require("fs");
-const xlsx = require("xlsx");
+import express from "express";
+import multer from "multer";
+import fs from "fs";
+import xlsx from "xlsx";
+import mongoose from "mongoose";
 
+export const app = express();
 // Middleware to parse JSON body
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -47,40 +47,78 @@ app.post("/upload-excel", upload.single("file"), (req, res) => {
   const filePath = uploadedImage.path; //
   console.log("filePath:", filePath);
 
-  // res.status(201).json({
-  //   message: "Excel file uploaded successfully!",
-  //   fileDetails: uploadedImage,
-  //   formData: req.body,
-  // });
   try {
     const workbook = xlsx.readFile(filePath); // Read Excel file
+    const groupedData = {}; // To store grouped data from all sheets
+    // Loop through all sheet names
+    for (const sheetName of workbook.SheetNames) {
+      const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]); // Convert sheet to JSON
+      // Group data by specified columns
+      sheetData.forEach((row) => {
+        const location = `${row["HOME PAGE"] || ""}_${row["Bank Name"] || ""}_${
+          row["POC Name"] || ""
+        }_${row["POC Contact Details"] || ""}_${row["POC Email id"] || ""}`;
 
-    const sheetName = workbook.SheetNames[1]; // Get the first sheet
+        // console.log("location" + location);
 
-    const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]); // Convert to JSON
-
-    // Group data by location
-    const groupedData = sheetData.reduce((acc, row) => {
-      const location =
-        row[
-          ("HOME PAGE",
-          "Bank Name",
-          "POC Name",
-          "POC Contact Details",
-          "POC Email id")
-        ]; // Adjust column name
-      if (location) {
-        if (!acc[location]) {
-          acc[location] = [];
+        if (location.trim()) {
+          if (!groupedData[location]) {
+            groupedData[location] = [];
+          }
+          groupedData[location].push({ ...row, sheet: sheetName }); // Include sheet name for clarity
         }
-        acc[location].push(row);
-      }
-      return acc;
-    }, {});
+      });
+    }
+    // --------------------------------------------------------------------------
 
+    // --------------------------------------------------------------------------
+
+    // const workbook = xlsx.readFile(filePath);
+
+    // const groupedData = {}; // To store grouped data from all sheets
+
+    // for (const sheetName of workbook.SheetNames) {
+    //   const sheetData = xlsx.utils.sheet_to_json(
+    //     workbook.SheetNames[sheetName]
+    //   );
+
+    //   sheetData.forEach((row) => {
+    //     const values = `${row["HOME PAGE"] || ""}_${row["Bank Name"] || ""}_${
+    //       row["POC Name"] || ""
+    //     }_${row["POC Contact Details"] || ""}_${row["POC Email id"] || ""}`;
+
+    //     if (values.trim()) {
+    //       if (!groupedData[values]) {
+    //         groupedData[values] = [];
+    //       }
+    //       groupedData[values].push({ ...row, sheet: sheetName });
+    //     }
+    //   });
+    // }
+
+    // const workbook = xlsx.readFile(filePath);
+
+    // const groupedData = workbook.SheetNames.reduce((acc, sheetName) => {
+    //   const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    //   sheetData.forEach((row) => {
+    //     const location = `${row["HOME PAGE"] || ""}_${row["Bank Name"] || ""}_${
+    //       row["POC Name"] || ""
+    //     }_${row["POC Contact Details"] || ""}_${row["POC Email id"] || ""}`;
+    //     if (location.trim()) {
+    //       if (!acc[location]) {
+    //         acc[location] = [];
+    //       }
+    //       acc[location].push({ ...row, sheet: sheetName });
+    //     }
+    //   });
+    //   return acc;
+    // }, {});
+
+    // Respond with the grouped data
     res.status(201).json({
-      message: "Data grouped by location successfully!",
-      data: groupedData, // Parsed data
+      message: "Data grouped by location successfully for all sheets!",
+      data: groupedData,
+      metadata: req.body,
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to process the Excel file." });
@@ -90,7 +128,15 @@ app.post("/upload-excel", upload.single("file"), (req, res) => {
   }
 });
 
-// Start the server
+mongoose
+  .connect(
+    "mongodb+srv://animeshpandeyit:Animesh123@uploading-file.7zrbd.mongodb.net/"
+  )
+  .then(() => console.log("Connected!"))
+  .catch((err) => console.error("Connection error:", err));
+
+const port = 3000;
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

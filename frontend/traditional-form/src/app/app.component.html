@@ -1,0 +1,88 @@
+<div class="container" style="border: 0.1rem solid greenyellow">
+  <form action="" [formGroup]="userform" (ngSubmit)="submitUserForm()">
+    <hr />
+
+    <div class="row">
+      <div class="col-md-6 camelcase">
+        <label for="firstName">firstName</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="firstName"
+          required
+          formControlName="firstName"
+        />
+      </div>
+      <div class="col-md-6 camelcase">
+        <label for="lastName">lastName</label>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="lastName"
+          required
+          formControlName="lastName"
+        />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 camelcase">
+        <label for="email">email</label>
+        <input
+          type="email"
+          class="form-control"
+          placeholder="email"
+          formControlName="email"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="dateofbirth">date of birth</label>
+        <input
+          type="date"
+          class="form-control"
+          placeholder="date of birth"
+          formControlName="dateofbirth"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="row camelcase">
+      <div class="col-md-6">
+        <label for="contactNumber">contactNumber</label>
+        <input
+          type="tel"
+          class="form-control"
+          placeholder="contactNumber"
+          formControlName="contactNumber"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="profilePic">profilePic</label>
+        <input
+          type="file"
+          class="form-control-file"
+          id="profilePic"
+          formControlName="profilePic"
+          (change)="onFileChange($event)"
+        />
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+  </form>
+
+  <button class="btn btn-success m-3" (click)="toggleModal()">
+    View Stored Data
+  </button>
+
+  <app-modal
+    *ngIf="isModalVisible"
+    [data]="formDataStored"
+    (edit)="handleEdit($event)"
+    (update)="handleUpdate($event)"
+    (delete)="handleDelete($event)"
+  ></app-modal>
+</div>

@@ -1,0 +1,36 @@
+<div class="modal-container">
+  <div class="modal-content">
+    <h2>Form Data</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Date of Birth</th>
+          <th>Contact Number</th>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of data">
+          <td>{{ item.id }}</td>
+          <td>{{ item.firstName }}</td>
+          <td>{{ item.lastName }}</td>
+          <td>{{ item.email }}</td>
+          <td>{{ item.dateofbirth }}</td>
+          <td>{{ item.contactNumber }}</td>
+          <td>
+            <img *ngIf="item.profilePic" [src]="item.profilePic" alt="Profile Picture" width="50" height="50" />
+          </td>
+          <td>
+            <button type="button" class="btn btn-secondary m-3 mt-0" (click)="onEdit(item)" [disabled]="isEditInProgress">Edit</button>
+            <button type="button" class="btn btn-danger m-3 mt-0" (click)="onDelete(item)">Delete</button>
+            <button type="button" class="btn btn-primary m-3 mt-0" (click)="onUpdate(item)">Update</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
